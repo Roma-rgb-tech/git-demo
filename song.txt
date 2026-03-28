@@ -16,5 +16,10 @@ IT IS MERGE CONFLICT
 
 Form the lines 
 Shield by shield
+<<<<<<< HEAD
 standing strong 
 on this their chosen battle field
+=======
+Side by side 
+We're marchnig into destiny 
+>>>>>>> a65f434 (fixed)
