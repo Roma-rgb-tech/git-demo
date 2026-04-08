@@ -1,10 +1,10 @@
 # no .log files
 *.log
 
-# but do track error.log, even though you're 
-ignoring .log files above 
+# but do track error.log, even though you're
+ignoring .log files above
 
-# only ignore the TODO file in the current 
+# only ignore the TODO file in the current
 directory, not subdir/TODO
 /TODO
 
