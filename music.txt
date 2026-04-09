@@ -1,9 +1,4 @@
-
-
-
-
-
-
-
-
-For stash only
+I'am practice
+To solve
+Merge 
+Conflict
