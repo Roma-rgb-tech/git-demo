@@ -100,6 +100,86 @@ if (featureFlags.newCheckout) {
 - **Постійна готовність до деплою** — `main` завжди в робочому стані
 - **Спрощений pipeline** — немає складної логіки злиття між кількома довгоживучими гілками
 
+
+---
+ 
+## GitHub Flow
+ 
+**GitHub Flow** — спрощена модель розгалуження від GitHub. На відміну від Gitflow, тут лише одна довгоживуча гілка — `main`. Вся робота відбувається у короткоживучих гілках, які одразу зливаються в `main` через Pull Request.
+ 
+### Принцип роботи
+ 
+```
+main
+ ├── feature/login      → PR → merge → deploy
+ ├── fix/header-bug     → PR → merge → deploy
+ └── docs/update-readme → PR → merge → deploy
+```
+ 
+> `main` завжди deployable — кожен merge одразу йде в продакшн (або запускає деплой).
+ 
+### Цикл розробки (6 кроків)
+ 
+```
+1. Створи гілку від main
+       ↓
+2. Роби коміти
+       ↓
+3. Відкрий Pull Request (навіть якщо не готово — для обговорення)
+       ↓
+4. Обговорення та Code Review
+       ↓
+5. Merge в main
+       ↓
+6. Деплой
+```
+ 
+```bash
+# 1. Створити гілку
+git checkout main
+git pull origin main
+git checkout -b feature/dark-mode
+ 
+# 2. Розробка + коміти
+git add .
+git commit -m "feat(ui): add dark mode toggle"
+ 
+# 3. Запушити та відкрити PR
+git push origin feature/dark-mode
+# → відкрити Pull Request на GitHub
+ 
+# 4. Після approve — merge в main (зазвичай Squash merge)
+# 5. GitHub Actions автоматично деплоїть main
+```
+ 
+### Порівняння з Gitflow та TBD
+ 
+| Параметр | Gitflow | GitHub Flow | Trunk-based |
+|---|---|---|---|
+| Довгоживучих гілок | Багато (`main`, `develop`) | Одна (`main`) | Одна (`main`) |
+| Тривалість feature-гілок | Дні / тижні | 1–3 дні | Години |
+| Релізи | Через `release`-гілки | Кожен merge = реліз | Кожен merge = реліз |
+| Версіонування | Теги на `main` | Теги або CD | Feature flags + теги |
+| Підходить для | Великих команд, SaaS з версіями | Більшості команд | Зрілих команд з CI |
+ 
+### Переваги та недоліки
+ 
+✅ Простий і зрозумілий — легко пояснити новачку  
+✅ Добре інтегрується з GitHub Actions / CI  
+✅ Швидкий цикл — від ідеї до продакшну за день  
+✅ Немає "release branch hell" як у Gitflow  
+❌ Не підходить, якщо треба підтримувати кілька версій одночасно  
+❌ Вимагає дисципліни: `main` завжди має бути робочим  
+❌ Без feature flags важко мерджити незавершені великі фічі  
+ 
+### Коли обирати GitHub Flow
+ 
+- Веб-застосунки з безперервним деплоєм (SaaS, стартапи)
+- Команди до ~20 розробників
+- Один активний реліз у продакшні
+- Є налаштований CI/CD pipeline
+
+ 
 ---
 
 ## Conventional Commits
