@@ -1,0 +1,26 @@
+name: Docker CI/CD Pipeline
+
+# 1. Визначаємо, коли запускати пайплайн
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+      runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Lint Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+
+           - name: Build Docker image
+        run: docker build -t my-app:${{ github.sha }} .
+
+ 
