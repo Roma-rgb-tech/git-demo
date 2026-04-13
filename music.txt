@@ -8,4 +8,4 @@ cool drinks. We drove to the beach in our car,
 and the sun was shining brightly.
 The sand felt warm under our feet.
 
-AWS Access Key: AKIAIMNO7CQ9REXAMPLE
+AWS_Access_Key:ARFFAsAKIAIMNO7CQ9REXAMPLE
