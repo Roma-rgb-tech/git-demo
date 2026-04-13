@@ -7,3 +7,5 @@ a picinic basket with cakes, fruits, and
 cool drinks. We drove to the beach in our car, 
 and the sun was shining brightly.
 The sand felt warm under our feet.
+
+API_PRIVATE_KEY=910290302190290429039120
