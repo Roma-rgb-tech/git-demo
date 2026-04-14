@@ -1,16 +1,22 @@
 name: Docker CI/CD Pipeline
 
-on: [push, pull_request] 
+on: [push, pull_request]
 
 jobs:
-  gitleaks:
+  security-scan: 
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: Gitleaks scan
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Secure Hadolint (Docker Linter)
+        uses: tmknom/secure-hadolint-action@v0.4.2
+        with:
+          failure-threshold: warning
