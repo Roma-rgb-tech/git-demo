@@ -6,7 +6,5 @@ a picinic basket with cakes, fruits, and
 
 cool drinks. We drove to the beach in our car, 
 and the sun was shining brightly.
-The sand felt warm under our feet.
+    The sand felt warm under our feet.
 
-
-Slack: xoxp-123456789012-123456789012-123456789012-abcdef1234567890abcdef1234567890
