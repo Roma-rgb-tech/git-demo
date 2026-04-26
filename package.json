@@ -1,6 +1,6 @@
 {
   "name": "git-demo",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "scripts": {
     "commit": "cz",
     "release": "standard-version",
