@@ -1,4 +1,4 @@
-I'm a DevOps student currently focusing on Linux, Networking, Git, Docker 
+I'm a DevOps student currently focusing on Linux, Networking, Git, Docker and Terraform  
 
 wall of shields
 standing strong 
