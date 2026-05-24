@@ -1,4 +1,4 @@
-I'm a DevOps student currently focusing on Linux, Networking, Git, Docker and Terraform 
+I'm a DevOps student currently focusing on Linux, Networking, Git, Docker and Terraform with my primary interesting lying in cloud technology and automation.
 with my primary interest lying in cloud technologies and automation
 
 wall of shields
