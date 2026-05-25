@@ -1,18 +1,28 @@
-# no .log files
+node_modules/
+
+# macOS системні файли (дуже важливо для MacBook)
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Логи (ти маєш file.log у папці)
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# but do track error.log, even though you're
-ignoring .log files above
+# Редактори та IDE
+.vscode/
+.idea/
+*.swp
+*.swo
 
-# only ignore the TODO file in the current
-directory, not subdir/TODO
-/TODO
+# Секретні дані (на майбутнє)
+.env
+.env.local
 
-# ignore all files in the build/ directory
-build/
-
-# ignore doc/notes.txt, but not doc/server/arch.txt
-doc/*.txt
-
-# ignore all .pdf files in the doc/ directory
-doc/**/*.pdf
+# DevOps (якщо почнеш працювати з Terraform/Cloud прямо тут)
+.terraform/
+*.tfstate
+*.tfstate.backup
+crash.log
