@@ -1,5 +1,6 @@
 I'm a DevOps student currently focusing on Linux, Networking, Git, Docker and Terraform with my primary interesting lying in cloud technology and automation.
 with my primary interest lying in cloud technologies and automation
+I see myself as a queilifed Junior or Middle DevOps engineer at epam
 
 wall of shields
 standing strong 
