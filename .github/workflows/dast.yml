@@ -13,9 +13,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Start Application
-         run: |
-          docker-compose up -d
-          sleep 15 # Даємо час додатку повністю запуститися
+         run: 
+         - docker-compose up -d
+         - sleep 15
 
       - name: OWASP ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.12.0
