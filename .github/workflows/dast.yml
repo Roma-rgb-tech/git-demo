@@ -16,6 +16,9 @@ jobs:
         run: |
           python3 -m http.server 8080 &
           sleep 15
+          
+      - name: Fix workspace permissions for ZAP
+        run: chmod -R a+rw .
 
       - name: OWASP ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.12.0
