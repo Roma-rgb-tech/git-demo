@@ -16,35 +16,23 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Prepare web root (exclude .git and repo internals)
-        run: |
-          mkdir -p zap-www
-          find . -maxdepth 1 \
-            ! -name '.git' \
-            ! -name '.github' \
-            ! -name '.zap' \
-            ! -name 'zap-www' \
-            ! -name '.' \
-            -exec cp -r {} zap-www/ \;
-
       - name: Start Application
         run: |
-          cd zap-www && python3 -m http.server 8080 &
-          echo "Waiting for server..."
+          python3 -m http.server 8080 &
           for i in $(seq 1 15); do
-            curl -sf http://localhost:8080 && echo "Ready" && break
+            curl -sf http://localhost:8080 && echo "Server ready" && break
             sleep 2
           done
 
-      - name: Create ZAP output directory
-        run: mkdir -p zap-output && chmod a+rw zap-output
+      - name: Fix ZAP workspace permissions
+        run: chmod a+rw ${{ github.workspace }}
 
       - name: OWASP ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.12.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           target: 'http://localhost:8080'
-          rules_file_name: '.zap/rules.tsv'
+          rules_file_name: '.zap/rules.tsv'   
           fail_action: true
           artifact_name: 'zap-scan-report'
-          issue_title: ''  # Disable automatic issue creation
+          issue_title: ''                     
