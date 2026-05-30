@@ -1,5 +1,4 @@
 name: "Security Scan (DAST)"
-
 on:
   push:
     branches: ["main"]
