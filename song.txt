@@ -1,3 +1,4 @@
 I'm a DevOps student currently focusing on Linux, Networking, Git, Docker and Terraform with my primay interesting lying in cloud technology and automation. And using Security scanning like: Tryvy, Snyk, Gitleaks. SAST(Static Application Security Testing), DAST(Dynamic Application Security Testing)
 with my primary interest lying in cloud technologies and automation
 
+This experience tough me a critical importance of secrets management, and using environment variables for sensetive data.
