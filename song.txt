@@ -2,3 +2,5 @@ I'm a DevOps student currently focusing on Linux, Networking, Git, Docker and Te
 wit
 
 This experience tough me a critical importance of secrets management, and using environment variables for sensetive data.
+
+
