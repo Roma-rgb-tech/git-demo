@@ -5,6 +5,3 @@ For me being a good team player, means two things proactive communication and re
  Becoming familiar with new technologies requires of blends hands-on experimination structured learning and community engagement.To keep up with the fast-tech landscape. The most effective apprach involves jumping into practical application rather than relying solely on theory.
 
 
-I prefer Agile specifficly scrum, is the reason that scrum allow for iterative progress and clear communication through ceremonies like daily stand ups and sprint plannning. In DevOps, this is essential for allaging infastructure changes with the devolopments teams needs. For instance, when I was automating docker updates with watchtower, I treated it's a mini sprint. I first defiend the task in my backlog then i implemend the automation, and finally i verified the result vi telegram notification. Thats why I find the Scrum is the most effective way to manage a complex technical task and maintain a transperent workflow
-
-
