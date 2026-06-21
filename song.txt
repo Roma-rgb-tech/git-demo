@@ -1,2 +1,1 @@
-I'm a DevOps student currently focusing on Linux, Networking, Git, Docker and Terraform with my primay interesting lying in cloud technology and automation. And using Security scanning like: Tryvy, Snyk, Gitleaks. SAST(Static Application Security Testing), DAST(Dynamic Application Security Testing)
-
+:"For me being a good team player, means two things proactive communication and reliable documentation. First I belive in transparancy, If i run into a blocker or make a mistake while configuring something, I don't hide it I communicate it earlddy, so the team can help or adopt. Second I highly value keeping clean structured documentation.While I'm solve a tricky technical issue, o
