@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Skycast — Live Weather Dashboard</title>
+    <meta name="description" content="Search any city and view live weather with request history. UI · Backend · History (PostgreSQL)." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.454.0/font/lucide.css" />
+    <style>
+      :root {
+        --bg: #0d1626;
+        --fg: #eef2ff;
+        --muted: #9aa6bf;
+        --surface: rgba(30, 42, 68, 0.55);
+        --border: rgba(255, 255, 255, 0.08);
+        --primary: #4fa9ff;
+        --primary-fg: #0d1626;
+        --accent: #38dcc7;
+        --sun: #ffcc66;
+        --storm: #ff6b6b;
+        --radius: 1rem;
+        --shadow-card: 0 10px 40px -20px rgba(0, 0, 0, 0.5);
+        --shadow-glow: 0 20px 60px -20px rgba(79, 169, 255, 0.5);
+        --grad-sky: linear-gradient(160deg, #2c3a76 0%, #2f6ba8 45%, #6bb6d8 100%);
+      }
+      * { box-sizing: border-box; border-color: var(--border); }
+      html, body { margin: 0; padding: 0; min-height: 100%; }
+      body {
+        font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+        color: var(--fg);
+        background:
+          radial-gradient(60% 80% at 20% 10%, rgba(140, 100, 220, 0.35), transparent 60%),
+          radial-gradient(50% 70% at 90% 0%, rgba(80, 210, 200, 0.30), transparent 60%),
+          radial-gradient(80% 60% at 50% 100%, rgba(60, 100, 210, 0.35), transparent 60%),
+          var(--bg);
+        background-attachment: fixed;
+      }
+      h1, h2, h3 { font-family: "Space Grotesk", sans-serif; letter-spacing: -0.02em; margin: 0; }
+      button { font-family: inherit; cursor: pointer; }
+      main { max-width: 72rem; margin: 0 auto; padding: 2rem 1rem; }
+      @media (min-width: 640px) { main { padding: 3rem 2rem; } }
+
+      .glass {
+        background: var(--surface);
+        backdrop-filter: blur(20px) saturate(140%);
+        -webkit-backdrop-filter: blur(20px) saturate(140%);
+        border: 1px solid var(--border);
+        border-radius: calc(var(--radius) + 4px);
+        box-shadow: var(--shadow-card);
+      }
+      .text-gradient {
+        background: linear-gradient(90deg, #eaf4ff, #7fe3d0);
+        -webkit-background-clip: text; background-clip: text; color: transparent;
+      }
+
+      header.top { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem; }
+      .brand { display: flex; align-items: center; gap: .75rem; }
+      .brand .logo {
+        width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center;
+        background: var(--grad-sky); box-shadow: var(--shadow-glow); color: white;
+      }
+      .brand h1 { font-size: 1.5rem; }
+      .brand p { margin: 0; font-size: .75rem; color: var(--muted); }
+      .status { display: flex; align-items: center; gap: .5rem; font-size: .75rem; color: var(--muted); }
+      .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+      .dot.down { background: var(--storm); }
+      @keyframes pulse { 0%, 100% { opacity: 1 } 50% { opacity: .4 } }
+
+      .search { padding: .5rem; margin-bottom: 1.5rem; position: relative; }
+      .search .row { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; }
+      .search .field { position: relative; flex: 1; min-width: 220px; display: flex; align-items: center; }
+      .search input {
+        width: 100%; background: transparent; border: none; outline: none;
+        color: var(--fg); font-size: 1rem; padding: .85rem 1rem .85rem 2.75rem;
+      }
+      .search input::placeholder { color: rgba(154, 166, 191, .7); }
+      .search .field .i { position: absolute; left: 1rem; color: var(--muted); }
+      .btn {
+        display: inline-flex; align-items: center; gap: .5rem;
+        border-radius: 12px; padding: .85rem 1.25rem; font-size: .875rem; font-weight: 600;
+        border: 1px solid transparent; color: var(--fg); background: rgba(255,255,255,.06);
+        transition: opacity .15s, background .15s;
+      }
+      .btn:hover { background: rgba(255,255,255,.12); }
+      .btn.primary { background: var(--primary); color: var(--primary-fg); }
+      .btn.primary:hover { opacity: .9; background: var(--primary); }
+      .btn.ghost { background: rgba(255,255,255,.05); border-color: var(--border); }
+      .btn[disabled] { opacity: .5; cursor: not-allowed; }
+      .btn .spin { animation: spin 1s linear infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+
+      .suggest {
+        position: absolute; left: .5rem; right: .5rem; top: 100%; margin-top: .5rem;
+        z-index: 10; max-height: 16rem; overflow: auto; padding: .25rem;
+      }
+      .suggest button {
+        width: 100%; text-align: left; display: flex; gap: .5rem; align-items: center;
+        padding: .5rem .75rem; border-radius: 10px; background: transparent; border: none; color: var(--fg);
+      }
+      .suggest button:hover { background: rgba(255,255,255,.06); }
+      .suggest .country { color: var(--muted); font-size: .875rem; }
+
+      .grid { display: grid; gap: 1.5rem; grid-template-columns: 1fr; }
+      @media (min-width: 960px) { .grid { grid-template-columns: 2fr 3fr; } }
+
+      .hero { position: relative; overflow: hidden; border-radius: calc(var(--radius) + 8px); padding: 2rem; }
+      .hero::before { content: ""; position: absolute; inset: 0; background: var(--grad-sky); opacity: .95; }
+      .hero::after {
+        content: ""; position: absolute; top: -2.5rem; right: -2.5rem; width: 14rem; height: 14rem;
+        border-radius: 50%; background: rgba(255,255,255,.12); filter: blur(60px);
+      }
+      .hero > * { position: relative; z-index: 1; }
+      .hero .loc { display: flex; align-items: center; gap: .5rem; color: rgba(255,255,255,.8); font-size: .875rem; margin-bottom: 1.5rem; }
+      .temp { display: flex; align-items: flex-end; gap: 1rem; }
+      .temp .val { font-family: "Space Grotesk"; font-weight: 700; font-size: 5rem; line-height: 1; color: white; }
+      .temp .val sup { font-size: 2rem; vertical-align: top; }
+      .temp .ic { font-size: 3.5rem; color: var(--sun); margin-bottom: .5rem; }
+      .cond { margin-top: .5rem; color: rgba(255,255,255,.9); font-size: 1.125rem; font-weight: 500; }
+      .stats { margin-top: 2rem; display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+      .stat { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18); border-radius: 12px; padding: .75rem; }
+      .stat .l { font-size: .7rem; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,.75); display: flex; gap: .35rem; align-items: center; }
+      .stat .v { font-family: "Space Grotesk"; font-weight: 600; font-size: 1.125rem; color: white; margin-top: .25rem; }
+
+      .hero.empty { text-align: center; padding: 3rem 2rem; }
+      .hero.empty .big-ic { font-size: 4rem; color: var(--sun); }
+      .hero.empty h3 { font-size: 1.25rem; margin-top: 1rem; color: white; }
+      .hero.empty p { margin: .25rem 0 0; color: rgba(255,255,255,.75); font-size: .875rem; }
+
+      .panel { padding: 1.5rem; border-radius: calc(var(--radius) + 8px); }
+      .panel .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+      .panel h2 { font-size: 1.125rem; display: flex; gap: .5rem; align-items: center; }
+      .badge { background: rgba(255,255,255,.1); padding: .1rem .5rem; border-radius: 999px; font-size: .75rem; color: var(--muted); }
+
+      ul.hist { list-style: none; margin: 0; padding: 0; }
+      ul.hist li {
+        display: flex; align-items: center; gap: .75rem; padding: .85rem 0;
+        border-top: 1px solid var(--border);
+      }
+      ul.hist li:first-child { border-top: none; }
+      ul.hist .avatar { width: 40px; height: 40px; display: grid; place-items: center; background: rgba(255,255,255,.05); border-radius: 12px; color: var(--accent); }
+      ul.hist .name { font-weight: 500; }
+      ul.hist .meta { font-size: .75rem; color: var(--muted); }
+      ul.hist .id { color: var(--muted); font-size: .75rem; margin-left: .35rem; }
+      ul.hist .r { text-align: right; }
+      ul.hist .r .t { font-family: "Space Grotesk"; font-weight: 600; font-size: 1.125rem; }
+      ul.hist .r .s { font-size: .65rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+      ul.hist .del {
+        background: transparent; border: none; color: var(--muted); padding: .5rem; border-radius: 8px;
+        opacity: 0; transition: opacity .15s;
+      }
+      ul.hist li:hover .del { opacity: 1; }
+      ul.hist .del:hover { background: rgba(255,255,255,.08); color: var(--storm); }
+
+      .empty { text-align: center; padding: 3rem 1rem; color: var(--muted); font-size: .875rem; }
+      .empty .cir { width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,.05); display: grid; place-items: center; margin: 0 auto .75rem; color: var(--muted); }
+      .err { color: var(--storm); font-size: .75rem; padding: .5rem .75rem 0; }
+      footer { text-align: center; color: var(--muted); font-size: .75rem; margin-top: 2.5rem; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header class="top">
+        <div class="brand">
+          <div class="logo"><i class="icon icon-sparkles"></i></div>
+          <div>
+            <h1 class="text-gradient">Skycast</h1>
+            <p>UI · Backend · History — three-service weather app</p>
+          </div>
+        </div>
+        <div class="status"><span id="dot" class="dot"></span><span id="status-text">Backend live</span></div>
+      </header>
+
+      <section class="glass search">
+        <div class="row">
+          <div class="field">
+            <i class="icon icon-search i"></i>
+            <input id="city" autocomplete="off" placeholder="Search a city — Kyiv, Lisbon, Tokyo…" />
+            <div id="suggest" class="glass suggest" style="display:none"></div>
+          </div>
+          <button id="btn" class="btn primary"><i id="btn-ic" class="icon icon-refresh-cw"></i>Fetch</button>
+          <button id="auto" class="btn ghost"><i class="icon icon-play"></i><span id="auto-txt">Auto off</span></button>
+        </div>
+        <div id="err" class="err" style="display:none"></div>
+      </section>
+
+      <div class="grid">
+        <section id="hero" class="hero empty">
+          <div style="text-align:center;">
+            <i class="icon icon-cloud-sun big-ic"></i>
+            <h3>Where to today?</h3>
+            <p>Search a city above to see live conditions.</p>
+          </div>
+        </section>
+
+        <section class="glass panel">
+          <div class="head">
+            <h2><i class="icon icon-history" style="color:var(--accent)"></i>Recent requests <span id="count" class="badge">0</span></h2>
+            <button id="clear" class="btn ghost" style="padding:.4rem .7rem;font-size:.75rem;"><i class="icon icon-trash-2"></i>Clear all</button>
+          </div>
+          <div id="hist-wrap">
+            <div class="empty">
+              <div class="cir"><i class="icon icon-history"></i></div>
+              <p>No history yet. Fetch a city to populate the timeline.</p>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <footer>UI Service → Backend Proxy → History Service · PostgreSQL persistence</footer>
+    </main>
+
+    <script>
+      const API = "/api";
+      const $ = (id) => document.getElementById(id);
+      const cityEl = $("city"), btn = $("btn"), btnIc = $("btn-ic"), autoBtn = $("auto"), autoTxt = $("auto-txt");
+      const heroEl = $("hero"), suggestEl = $("suggest"), errEl = $("err"), dot = $("dot"), statusText = $("status-text");
+      const histWrap = $("hist-wrap"), countEl = $("count"), clearBtn = $("clear");
+      let auto = false, timer = null, geoTimer = null;
+
+      function iconForTemp(t) {
+        if (t === undefined || t === null) return "cloud";
+        if (t >= 25) return "sun";
+        if (t >= 10) return "cloud-sun";
+        if (t >= 0) return "cloud";
+        return "snowflake";
+      }
+      function conditionLabel(t) {
+        if (t === undefined) return "Unknown";
+        if (t >= 30) return "Hot"; if (t >= 22) return "Warm"; if (t >= 12) return "Mild";
+        if (t >= 4) return "Cool"; if (t >= -5) return "Cold"; return "Freezing";
+      }
+      function compass(d) {
+        if (d === undefined) return "—";
+        const dirs = ["N","NE","E","SE","S","SW","W","NW"];
+        return dirs[Math.round(d / 45) % 8];
+      }
+      function timeAgo(iso) {
+        const s = (Date.now() - new Date(iso).getTime()) / 1000;
+        if (s < 60) return `${Math.floor(s)}s ago`;
+        if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+        if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+        return `${Math.floor(s / 86400)}d ago`;
+      }
+      function setBackend(up) {
+        dot.className = "dot" + (up ? "" : " down");
+        statusText.textContent = up ? "Backend live" : "Backend unreachable";
+      }
+      function showErr(msg) { errEl.textContent = msg; errEl.style.display = msg ? "block" : "none"; }
+
+      async function fetchWeather(name) {
+        const q = (name ?? cityEl.value).trim();
+        if (!q) { showErr("Enter a city name"); return; }
+        showErr("");
+        btnIc.className = "icon icon-refresh-cw spin"; btn.disabled = true;
+        try {
+          const res = await fetch(`${API}/weather?city=${encodeURIComponent(q)}`);
+          if (!res.ok) throw new Error(`${res.status}`);
+          const j = await res.json();
+          setBackend(true);
+          renderHero(j);
+          await loadHistory();
+        } catch (e) {
+          setBackend(false);
+          showErr("Failed to fetch weather: " + e.message);
+        } finally {
+          btnIc.className = "icon icon-refresh-cw"; btn.disabled = false;
+        }
+      }
+
+      function renderHero(j) {
+        const cw = j?.payload?.current_weather;
+        const loc = j?.location_name || cityEl.value;
+        if (!cw) { return; }
+        const ic = iconForTemp(cw.temperature);
+        heroEl.classList.remove("empty");
+        heroEl.innerHTML = `
+          <div class="loc"><i class="icon icon-map-pin"></i><span>${loc}</span></div>
+          <div class="temp">
+            <div class="val">${Math.round(cw.temperature)}<sup>°C</sup></div>
+            <i class="icon icon-${ic} ic"></i>
+          </div>
+          <p class="cond">${conditionLabel(cw.temperature)}</p>
+          <div class="stats">
+            <div class="stat"><div class="l"><i class="icon icon-wind"></i>Wind speed</div><div class="v">${cw.windspeed} m/s</div></div>
+            <div class="stat"><div class="l"><i class="icon icon-compass"></i>Direction</div><div class="v">${compass(cw.winddirection)} · ${Math.round(cw.winddirection)}°</div></div>
+          </div>`;
+      }
+
+      async function loadHistory() {
+        try {
+          const res = await fetch(`${API}/history/recent?limit=15`);
+          if (!res.ok) throw new Error();
+          const rows = await res.json();
+          setBackend(true);
+          renderHistory(rows);
+        } catch {
+          setBackend(false);
+          renderHistory([], true);
+        }
+      }
+
+      function renderHistory(rows, down) {
+        countEl.textContent = rows.length;
+        clearBtn.disabled = !rows.length;
+        if (!rows.length) {
+          histWrap.innerHTML = `
+            <div class="empty">
+              <div class="cir"><i class="icon icon-history"></i></div>
+              <p>${down ? "History service is offline. Start the docker-compose stack to see saved requests." : "No history yet. Fetch a city to populate the timeline."}</p>
+            </div>`;
+          return;
+        }
+        const items = rows.map(r => {
+          const rt = r.response_body?.current_weather?.temperature;
+          const ic = iconForTemp(rt);
+          const name = r.response_body?.location_name || r.query_params?.city || "—";
+          return `
+            <li>
+              <div class="avatar"><i class="icon icon-${ic}"></i></div>
+              <div style="flex:1;min-width:0;">
+                <div class="name">${name}<span class="id">#${r.id}</span></div>
+                <div class="meta">${timeAgo(r.event_time)} · ${new Date(r.event_time).toLocaleString()}</div>
+              </div>
+              <div class="r">
+                ${rt !== undefined ? `<div class="t">${Math.round(rt)}°</div>` : ""}
+                <div class="s">${r.response_status === 200 ? "ok" : r.response_status}</div>
+              </div>
+              <button class="del" data-id="${r.id}" aria-label="Delete"><i class="icon icon-trash-2"></i></button>
+            </li>`;
+        }).join("");
+        histWrap.innerHTML = `<ul class="hist">${items}</ul>`;
+        histWrap.querySelectorAll(".del").forEach(b => b.addEventListener("click", async () => {
+          await fetch(`${API}/history/${b.dataset.id}`, { method: "DELETE" });
+          loadHistory();
+        }));
+      }
+
+      // Autocomplete
+      cityEl.addEventListener("input", () => {
+        clearTimeout(geoTimer);
+        const q = cityEl.value.trim();
+        if (q.length < 2) { suggestEl.style.display = "none"; return; }
+        geoTimer = setTimeout(async () => {
+          try {
+            const res = await fetch(`${API}/geocode?q=${encodeURIComponent(q)}`);
+            const j = await res.json();
+            const results = (j.results || []).slice(0, 6);
+            if (!results.length) { suggestEl.style.display = "none"; return; }
+            suggestEl.innerHTML = results.map(r => `
+              <button data-name="${r.name}" data-label="${r.name}${r.country ? ", " + r.country : ""}">
+                <i class="icon icon-map-pin" style="color:var(--accent)"></i>
+                <span>${r.name}</span><span class="country">${r.country || ""}</span>
+              </button>`).join("");
+            suggestEl.style.display = "block";
+            suggestEl.querySelectorAll("button").forEach(b => b.addEventListener("mousedown", (e) => e.preventDefault()));
+            suggestEl.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+              cityEl.value = b.dataset.label;
+              suggestEl.style.display = "none";
+              fetchWeather(b.dataset.name);
+            }));
+          } catch { /* ignore */ }
+        }, 250);
+      });
+      cityEl.addEventListener("blur", () => setTimeout(() => suggestEl.style.display = "none", 150));
+
+      cityEl.addEventListener("keydown", (e) => { if (e.key === "Enter") fetchWeather(); });
+      btn.addEventListener("click", () => fetchWeather());
+      autoBtn.addEventListener("click", () => {
+        auto = !auto;
+        autoTxt.textContent = "Auto " + (auto ? "on" : "off");
+        autoBtn.querySelector(".icon").className = "icon icon-" + (auto ? "pause" : "play");
+        clearInterval(timer);
+        if (auto) timer = setInterval(() => fetchWeather(), 20000);
+      });
+      clearBtn.addEventListener("click", async () => {
+        if (!confirm("Clear all history?")) return;
+        await fetch(`${API}/history/clear`, { method: "DELETE" });
+        loadHistory();
+      });
+
+      loadHistory();
+    </script>
+  </body>
+</html>
